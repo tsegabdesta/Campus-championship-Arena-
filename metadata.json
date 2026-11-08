@@ -1,0 +1,6 @@
+{
+  "name": "Campus Arena - Student Gaming & Competition Platform",
+  "description": "Ethiopian university student gaming platform: Play, Compete, Climb with Chess, Checkers, Tic-Tac-Toe, Quiz Bowl, EA FC, and DLS tournaments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
