@@ -41,16 +41,28 @@ import {
   validateTournaments,
   validateRooms,
 } from './data';
-import {
-  escapeHTML,
-  sanitizeUrl,
-  sanitizeRoomCode,
-  sanitizeText,
-} from './security';
+import { sanitizeRoomCode, sanitizeText } from './security';
 
 const STORAGE_KEY_USER = 'campus_arena_user';
 const STORAGE_KEY_TOURNAMENTS = 'campus_arena_tournaments';
 const STORAGE_KEY_ROOMS = 'campus_arena_rooms';
+
+/**
+ * Local initials avatar. Draws the first letter of the username, so the app
+ * never loads images from third-party servers (better privacy, and no extra
+ * mobile data). Real profile pictures will come with accounts and storage.
+ */
+function Avatar({ name, className = '' }: { name: string; className?: string }) {
+  const initial = (name.trim().charAt(0) || '?').toUpperCase();
+  return (
+    <div
+      aria-hidden="true"
+      className={`flex items-center justify-center font-black text-[#00f0ff] bg-gradient-to-tr from-[#0d121f] to-[#19233c] ${className}`}
+    >
+      {initial}
+    </div>
+  );
+}
 
 export default function App() {
   // Navigation
@@ -461,7 +473,7 @@ export default function App() {
 
     setRooms((prev) => [newRoom, ...prev]);
     setActiveModal({ type: 'lobby', roomCode });
-    notify(`Room ${roomCode} created! Share code with classmate.`, '🚪');
+    notify(`Room ${roomCode} saved on this device (preview only).`, '🚪');
   };
 
   // Room Join
@@ -475,11 +487,10 @@ export default function App() {
     const exists = rooms.find((r) => r.id.toUpperCase() === clean.toUpperCase());
     if (exists) {
       setActiveModal({ type: 'lobby', roomCode: exists.id });
-      notify(`Joined lobby ${exists.id}!`, '🔌');
+      notify(`Opened lobby ${exists.id} (preview)`, '🔌');
     } else {
-      // Connect to verified simulated room
-      setActiveModal({ type: 'lobby', roomCode: clean });
-      notify(`Connected to room ${clean}`, '🔌');
+      // Rooms exist only in this browser, so an unknown code cannot be joined.
+      notify(`No room ${clean} found on this device.`, '⚠️');
     }
     setJoinCodeInput('');
   };
@@ -513,7 +524,7 @@ export default function App() {
     setTournaments((prev) => [newTourney, ...prev]);
     setActiveModal(null);
     setHostTitle('');
-    notify('Official campus tournament published!', '🏆');
+    notify('Tournament saved on this device (demo listing).', '🏆');
   };
 
   // Tournament Registration with Duplicate Protection
@@ -634,17 +645,22 @@ export default function App() {
             onClick={() => setActivePage('profile')}
             className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-[#131b2e] border border-[#00f0ff]/20 hover:border-[#00f0ff] transition-all"
           >
-            <img
-              src={sanitizeUrl(user.avatar)}
-              alt="Avatar"
-              className="w-7 h-7 rounded-full bg-[#0d121f]"
-            />
+            <Avatar name={user.username} className="w-7 h-7 rounded-full text-xs" />
             <span className="text-xs font-bold text-gray-200 hidden sm:inline truncate max-w-[100px]">
-              {escapeHTML(user.username)}
+              {user.username}
             </span>
           </button>
         </div>
       </header>
+
+      {/* Honest status banner: this build has no accounts, server, or multiplayer yet. */}
+      <div
+        role="note"
+        className="px-4 md:px-8 py-2 text-[11px] text-center text-amber-200 bg-amber-500/10 border-b border-amber-500/20"
+      >
+        <strong>Preview build.</strong> Games run on this device only. Leaderboard rows, rooms and
+        tournaments are sample data. Accounts and real multiplayer are not built yet.
+      </div>
 
       {/* ========================================================
           APP SHELL (Sidebar + Main)
@@ -704,7 +720,7 @@ export default function App() {
             <div className="p-3.5 rounded-xl bg-[#131b2e] border border-[#00f0ff]/15">
               <div className="flex items-center gap-2 text-xs font-bold text-white mb-1">
                 <span>🇪🇹</span>
-                <span className="truncate">{escapeHTML(user.university)}</span>
+                <span className="truncate">{user.university}</span>
               </div>
               <p className="text-[11px] text-gray-400">
                 Representing your campus pride across Ethiopia.
@@ -738,7 +754,7 @@ export default function App() {
                   </h2>
                   <p className="text-gray-300 text-sm md:text-base leading-relaxed">
                     Compete in EA FC, Dream League Soccer, Chess, and Academic Blitz.
-                    Represent your campus, earn virtual XP, and climb the national leaderboard. Zero money, 100% skill and pride.
+                    Represent your campus, earn virtual XP, and climb the leaderboard. Zero money, 100% skill and pride.
                   </p>
                   <div className="flex flex-wrap gap-3 pt-2">
                     <button
@@ -766,10 +782,10 @@ export default function App() {
               {/* Metrics Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'Campuses Connected', val: '48', icon: '🎓' },
-                  { label: 'Matches Played', val: '8,420', icon: '🎮' },
-                  { label: 'Active Tournaments', val: '12', icon: '🏆' },
-                  { label: 'Skill-Based (Non-Betting)', val: '100%', icon: '🛡️' },
+                  { label: 'Universities Listed', val: String(DEFAULT_UNIVERSITIES.length), icon: '🎓' },
+                  { label: 'Playable Games', val: '3', icon: '🎮' },
+                  { label: 'Sample Tournaments', val: String(tournaments.length), icon: '🏆' },
+                  { label: 'Free & Non-Betting', val: 'Yes', icon: '🛡️' },
                 ].map((m, idx) => (
                   <div
                     key={idx}
@@ -859,17 +875,17 @@ export default function App() {
                       <div>
                         <div className="flex items-center justify-between text-xs">
                           <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold">
-                            {escapeHTML(t.status)}
+                            {t.status}
                           </span>
-                          <span className="text-[#00f0ff] font-bold">{escapeHTML(t.type)}</span>
+                          <span className="text-[#00f0ff] font-bold">{t.type}</span>
                         </div>
                         <h4 className="text-base font-bold text-white mt-2.5 leading-snug">
-                          {escapeHTML(t.title)}
+                          {t.title}
                         </h4>
-                        <p className="text-xs text-gray-400 mt-1">🏛️ {escapeHTML(t.university)}</p>
+                        <p className="text-xs text-gray-400 mt-1">🏛️ {t.university}</p>
 
                         <div className="my-3 p-2.5 rounded-lg bg-[#0d121f] border border-white/5 text-xs">
-                          <div className="text-amber-400 font-bold">Prize: {escapeHTML(t.reward)}</div>
+                          <div className="text-amber-400 font-bold">Prize: {t.reward}</div>
                           <div className="text-[10px] text-gray-500">Non-monetary Virtual XP</div>
                         </div>
                       </div>
@@ -1093,7 +1109,7 @@ export default function App() {
                       <div>
                         <h3 className="text-lg font-bold">🎯 Campus Checkers (Dama)</h3>
                         <p className="text-xs text-gray-400">
-                          {checkersTurn === 1 ? 'Your Turn (Cyan Pieces)' : 'Opponent Turn (Purple Pieces)'}
+                          {checkersTurn === 1 ? 'Cyan pieces to move' : 'Purple pieces to move'} (2 players, one device)
                         </p>
                       </div>
                       <button
@@ -1142,7 +1158,7 @@ export default function App() {
                   <div className="max-w-md mx-auto text-center space-y-4">
                     <h3 className="text-lg font-bold">♟️ Ethiopian Inter-Varsity Chess Board</h3>
                     <p className="text-xs text-gray-400">
-                      Standard competitive layout configured for AAU & ASTU blitz ladders.
+                      Preview board only. Moves are not playable yet.
                     </p>
                     <div className="grid grid-cols-8 border-2 border-[#00f0ff]/30 rounded-xl overflow-hidden aspect-square max-w-[340px] mx-auto">
                       {Array(64)
@@ -1159,7 +1175,7 @@ export default function App() {
                           return (
                             <div
                               key={i}
-                              onClick={() => notify('Opening piece recorded')}
+                              onClick={() => notify('Chess is not playable yet.', 'ℹ️')}
                               className={`flex items-center justify-center text-xl cursor-pointer ${
                                 dark ? 'bg-[#111827]' : 'bg-[#1f2937]'
                               } ${r <= 1 ? 'text-[#8b5cf6]' : 'text-[#00f0ff]'}`}
@@ -1200,7 +1216,7 @@ export default function App() {
                 <div>
                   <h2 className="text-2xl font-black">🏆 Campus Championships</h2>
                   <p className="text-xs text-gray-400 mt-1">
-                    Official university esports ladders. Always 100% free with zero betting.
+                    Sample tournament listings for this preview. Always 100% free with zero betting.
                   </p>
                 </div>
                 <button
@@ -1246,24 +1262,24 @@ export default function App() {
                       <div>
                         <div className="flex items-center justify-between text-xs">
                           <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold">
-                            {escapeHTML(t.status)}
+                            {t.status}
                           </span>
-                          <span className="text-[#00f0ff] font-bold">{escapeHTML(t.type)}</span>
+                          <span className="text-[#00f0ff] font-bold">{t.type}</span>
                         </div>
                         <h4 className="text-base font-bold text-white mt-2.5 leading-snug">
-                          {escapeHTML(t.title)}
+                          {t.title}
                         </h4>
-                        <p className="text-xs text-gray-400 mt-1">🏛️ {escapeHTML(t.university)}</p>
+                        <p className="text-xs text-gray-400 mt-1">🏛️ {t.university}</p>
 
                         <div className="flex justify-between items-center text-xs text-gray-400 my-3">
                           <span>
                             👥 {t.participantsCount}/{t.maxParticipants} Students
                           </span>
-                          <span>📅 {escapeHTML(t.startDate)}</span>
+                          <span>📅 {t.startDate}</span>
                         </div>
 
                         <div className="p-2.5 rounded-lg bg-[#0d121f] border border-white/5 text-xs mb-4">
-                          <div className="text-amber-400 font-bold">Prize: {escapeHTML(t.reward)}</div>
+                          <div className="text-amber-400 font-bold">Prize: {t.reward}</div>
                           <div className="text-[10px] text-gray-500">Non-monetary Virtual XP</div>
                         </div>
                       </div>
@@ -1381,7 +1397,7 @@ export default function App() {
                     </button>
 
                     <div className="p-3 rounded-xl bg-[#00f0ff]/5 border border-[#00f0ff]/20 text-[11px] text-gray-400 leading-relaxed">
-                      ℹ️ <strong>Prototype Real-Time Notice:</strong> Real-time peer networking currently operates on simulated WebSocket handshakes. Django Channels + Redis websockets are integrated in the production deployment tier.
+                      ℹ️ <strong>Preview notice:</strong> Rooms are saved only in this browser. Real multiplayer (two players on different devices) is not built yet, so nobody else can join your room.
                     </div>
                   </div>
                 </form>
@@ -1407,11 +1423,11 @@ export default function App() {
                         {rooms.map((r) => (
                           <tr key={r.id} className="hover:bg-white/5 transition-colors">
                             <td className="p-3.5 pl-5 font-mono font-bold text-[#00f0ff]">
-                              {escapeHTML(r.id)}
+                              {r.id}
                             </td>
-                            <td className="p-3.5 font-medium">{escapeHTML(r.name)}</td>
-                            <td className="p-3.5 text-gray-300">{escapeHTML(r.game)}</td>
-                            <td className="p-3.5 text-gray-400">{escapeHTML(r.host)}</td>
+                            <td className="p-3.5 font-medium">{r.name}</td>
+                            <td className="p-3.5 text-gray-300">{r.game}</td>
+                            <td className="p-3.5 text-gray-400">{r.host}</td>
                             <td className="p-3.5">
                               {r.players}/{r.max}
                             </td>
@@ -1439,9 +1455,10 @@ export default function App() {
           {activePage === 'leaderboard' && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-black">🥇 National Campus Leaderboards</h2>
+                <h2 className="text-2xl font-black">🥇 Campus Leaderboard (Preview)</h2>
                 <p className="text-xs text-gray-400 mt-1">
-                  Rankings across all 48 Ethiopian universities dynamically sorted by Campus XP.
+                  Sorted by Campus XP. Rows marked "Sample" are made-up demo data; only your row is
+                  real, and it is stored on this device. Verified rankings need accounts and a server.
                 </p>
               </div>
 
@@ -1478,21 +1495,21 @@ export default function App() {
                               {rankNumber > 3 && <span className="text-gray-400">#{rankNumber}</span>}
                             </td>
                             <td className="p-3.5 font-bold flex items-center gap-1.5">
-                              <span>{escapeHTML(r.name)}</span>
+                              <span>{r.name}</span>
                               {r.isCurrentUser && (
                                 <span className="text-[10px] bg-[#00f0ff] text-black font-extrabold px-1.5 py-0.5 rounded">
                                   YOU
                                 </span>
                               )}
                             </td>
-                            <td className="p-3.5 text-gray-300">🏛️ {escapeHTML(r.campus)}</td>
+                            <td className="p-3.5 text-gray-300">🏛️ {r.campus}</td>
                             <td className="p-3.5 font-mono">{r.winRate}</td>
                             <td className="p-3.5 font-mono font-bold text-amber-400">
                               {r.points.toLocaleString()} XP
                             </td>
                             <td className="p-3.5 pr-5">
                               <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
-                                Master Tier
+                                {r.isCurrentUser ? 'This device' : 'Sample'}
                               </span>
                             </td>
                           </tr>
@@ -1512,17 +1529,16 @@ export default function App() {
             <div className="space-y-6">
               {/* Profile Card */}
               <div className="p-6 md:p-8 rounded-2xl bg-[#131b2e] border border-[#00f0ff]/20 flex flex-col sm:flex-row items-center gap-6">
-                <img
-                  src={sanitizeUrl(user.avatar)}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full border-4 border-[#00f0ff] bg-[#0d121f] p-1 shadow-[0_0_20px_rgba(0,240,255,0.3)]"
+                <Avatar
+                  name={user.username}
+                  className="w-24 h-24 rounded-full border-4 border-[#00f0ff] text-4xl shadow-[0_0_20px_rgba(0,240,255,0.3)]"
                 />
                 <div className="flex-1 text-center sm:text-left space-y-2">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                      <h2 className="text-2xl font-black">{escapeHTML(user.username)}</h2>
+                      <h2 className="text-2xl font-black">{user.username}</h2>
                       <p className="text-sm font-semibold text-[#00f0ff]">
-                        🏛️ {escapeHTML(user.university)}
+                        🏛️ {user.university}
                       </p>
                     </div>
                     <button
@@ -1544,10 +1560,13 @@ export default function App() {
                         key={i}
                         className="px-2.5 py-1 rounded-full bg-[#8b5cf6]/15 border border-[#8b5cf6]/40 text-xs font-bold text-white flex items-center gap-1.5"
                       >
-                        <span>{escapeHTML(a.icon)}</span>
-                        <span>{escapeHTML(a.title)}</span>
+                        <span>{a.icon}</span>
+                        <span>{a.title}</span>
                       </span>
                     ))}
+                    {user.achievements.length === 0 && (
+                      <span className="text-xs text-gray-400">No badges earned yet. Play a game to start.</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1577,8 +1596,8 @@ export default function App() {
                 <div className="p-5 rounded-2xl bg-[#131b2e] border border-[#00f0ff]/15 flex items-center gap-4">
                   <Shield size={28} className="text-emerald-400" />
                   <div>
-                    <div className="text-2xl font-black font-mono text-emerald-400">Verified</div>
-                    <div className="text-xs text-gray-400">Ethiopian Student Status</div>
+                    <div className="text-2xl font-black font-mono text-gray-300">Not verified</div>
+                    <div className="text-xs text-gray-400">Student verification comes with accounts</div>
                   </div>
                 </div>
               </div>
@@ -1606,7 +1625,7 @@ export default function App() {
               if (!tourney) return null;
               return (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-bold">{escapeHTML(tourney.title)}</h3>
+                  <h3 className="text-lg font-bold">{tourney.title}</h3>
                   <p className="text-xs text-[#00f0ff] font-semibold">
                     Knockout Elimination Stage
                   </p>
@@ -1623,10 +1642,10 @@ export default function App() {
                               key={idx}
                               className="p-3 rounded-xl bg-[#0d121f] border border-white/10 text-xs flex justify-between"
                             >
-                              <span className="font-bold text-[#00f0ff]">{escapeHTML(m.p1)}</span>
+                              <span className="font-bold text-[#00f0ff]">{m.p1}</span>
                               <span className="text-gray-400">vs</span>
-                              <span className="font-bold text-gray-200">{escapeHTML(m.p2)}</span>
-                              {m.score && <span className="font-mono text-amber-400">{escapeHTML(m.score)}</span>}
+                              <span className="font-bold text-gray-200">{m.p2}</span>
+                              {m.score && <span className="font-mono text-amber-400">{m.score}</span>}
                             </div>
                           ))}
                         </div>
@@ -1638,11 +1657,11 @@ export default function App() {
                         </div>
                         <div className="p-3 rounded-xl bg-[#0d121f] border border-amber-500/40 text-xs flex justify-between">
                           <span className="font-bold text-amber-400">
-                            {escapeHTML(tourney.bracket.finals[0]?.p1 || 'TBD')}
+                            {(tourney.bracket.finals[0]?.p1 || 'TBD')}
                           </span>
                           <span className="text-gray-400">vs</span>
                           <span className="font-bold text-gray-200">
-                            {escapeHTML(tourney.bracket.finals[0]?.p2 || 'TBD')}
+                            {(tourney.bracket.finals[0]?.p2 || 'TBD')}
                           </span>
                         </div>
                       </div>
@@ -1670,7 +1689,7 @@ export default function App() {
               <form onSubmit={handleCreateTournament} className="space-y-4">
                 <h3 className="text-lg font-bold">Host University Tournament</h3>
                 <p className="text-xs text-gray-400">
-                  Sanction an official tournament for your campus dorm or gaming society.
+                  Create a tournament listing. In this preview it is saved only on this device.
                 </p>
 
                 <div className="space-y-1">
@@ -1756,17 +1775,17 @@ export default function App() {
                 <h3 className="text-xl font-black">
                   LOBBY:{' '}
                   <span className="text-[#00f0ff] font-mono tracking-wider">
-                    {escapeHTML(activeModal.roomCode)}
+                    {activeModal.roomCode}
                   </span>
                 </h3>
                 <p className="text-xs text-gray-400">
-                  Connected via Ethiopian High-Speed Campus LAN Relay
+                  Local preview lobby. No network connection is used.
                 </p>
 
                 <div className="space-y-2 text-left my-4">
                   <div className="p-3 rounded-xl bg-[#0d121f] border border-white/10 flex items-center justify-between text-xs">
                     <span className="font-bold flex items-center gap-2">
-                      <span>👤</span> {escapeHTML(user.username)} (You)
+                      <span>👤</span> {user.username} (You)
                     </span>
                     <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">
                       READY
@@ -1774,26 +1793,24 @@ export default function App() {
                   </div>
                   <div className="p-3 rounded-xl bg-[#0d121f] border border-white/10 flex items-center justify-between text-xs">
                     <span className="text-gray-400 flex items-center gap-2">
-                      <span>🤖</span> Opponent Peer (Awaiting Classmate)
+                      <span>👥</span> Opponent (multiplayer not built yet)
                     </span>
                     <span className="px-2 py-0.5 rounded bg-gray-500/20 text-gray-400 font-bold text-[10px]">
-                      CONNECTING
+                      UNAVAILABLE
                     </span>
                   </div>
                 </div>
 
                 <p className="text-xs text-gray-400">
-                  Share code <strong className="text-[#00f0ff]">{escapeHTML(activeModal.roomCode)}</strong> with a friend in your dormitory.
+                  Room code <strong className="text-[#00f0ff]">{activeModal.roomCode}</strong> only
+                  works on this device for now.
                 </p>
 
                 <button
-                  onClick={() => {
-                    notify('Ready packet transmitted to peer');
-                    setActiveModal(null);
-                  }}
+                  onClick={() => setActiveModal(null)}
                   className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#00f0ff] to-[#2563eb] text-black font-extrabold text-sm"
                 >
-                  Start Game Session ⚡
+                  Close Lobby
                 </button>
               </div>
             )}

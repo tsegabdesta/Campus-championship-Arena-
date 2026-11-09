@@ -7,7 +7,10 @@
  */
 
 /**
- * Escapes HTML control characters to prevent Stored and DOM XSS injection.
+ * Escapes HTML control characters.
+ * NOTE: Do NOT use this on text rendered through React JSX ({value}). React
+ * already escapes it, and escaping twice shows "&amp;" on screen. Use this only
+ * when building raw HTML strings outside React (none exist today).
  */
 export function escapeHTML(val: unknown): string {
   if (val === null || val === undefined) return '';
@@ -36,7 +39,8 @@ export function sanitizeRoomCode(code: unknown): string {
  * Strictly guards against javascript:, data:, and vbscript: vectors.
  */
 export function sanitizeUrl(url: unknown): string {
-  const DEFAULT_AVATAR = 'https://api.dicebear.com/7.x/bottts/svg?seed=Abebe';
+  // Empty means "no remote image": the UI draws a local initials avatar instead.
+  const DEFAULT_AVATAR = '';
   if (!url || typeof url !== 'string') {
     return DEFAULT_AVATAR;
   }

@@ -20,25 +20,21 @@ export const DEFAULT_UNIVERSITIES = [
 ];
 
 export const DEFAULT_USER: UserProfile = {
+  // A fresh guest profile: no invented stats or badges. Real identity needs accounts (Phase 3).
   id: 'std_9021',
-  username: 'Abebe_AAU',
+  username: 'Guest_Student',
   university: 'Addis Ababa University (AAU)',
-  avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Abebe',
-  points: 1250,
-  wins: 28,
-  losses: 9,
-  achievements: [
-    { title: 'Campus Pioneer', icon: '🇪🇹' },
-    { title: 'Checkmate Grand', icon: '♟️' },
-    { title: 'Quiz Master', icon: '🧠' },
-    { title: 'Top 100 AAU', icon: '🏆' },
-  ],
+  avatar: '',
+  points: 0,
+  wins: 0,
+  losses: 0,
+  achievements: [],
 };
 
 export const DEFAULT_TOURNAMENTS: Tournament[] = [
   {
     id: 'tourney_1',
-    title: 'AAU Inter-Varsity EA FC 24 Clash',
+    title: 'Sample: AAU Inter-Varsity EA FC 24 Clash',
     game: 'EA FC 24',
     type: 'Console / PC',
     university: 'Addis Ababa University (AAU)',
@@ -51,15 +47,15 @@ export const DEFAULT_TOURNAMENTS: Tournament[] = [
     registeredUserIds: ['std_9021', 'std_4412'],
     bracket: {
       semiFinals: [
-        { p1: 'Abebe_AAU', p2: 'Dawit_ASTU', score: '3 - 1' },
+        { p1: 'Sample_Player_A', p2: 'Dawit_ASTU', score: '3 - 1' },
         { p1: 'Yonas_Jimma', p2: 'Kidus_AASTU', score: '2 - 0' },
       ],
-      finals: [{ p1: 'Abebe_AAU', p2: 'Yonas_Jimma', score: 'Pending' }],
+      finals: [{ p1: 'Sample_Player_A', p2: 'Yonas_Jimma', score: 'Pending' }],
     },
   },
   {
     id: 'tourney_2',
-    title: 'Dream League Soccer (DLS 24) Great Run',
+    title: 'Sample: Dream League Soccer (DLS 24) Great Run',
     game: 'Dream League Soccer',
     type: 'Mobile',
     university: 'All Ethiopian Universities',
@@ -74,7 +70,7 @@ export const DEFAULT_TOURNAMENTS: Tournament[] = [
   },
   {
     id: 'tourney_3',
-    title: 'Ethiopian Chess Blitz Championship',
+    title: 'Sample: Ethiopian Chess Blitz Championship',
     game: 'Chess',
     type: 'Web / Cross-Platform',
     university: 'ASTU & JU Joint Host',
@@ -95,7 +91,7 @@ export const DEFAULT_TOURNAMENTS: Tournament[] = [
   },
   {
     id: 'tourney_4',
-    title: 'Inter-Campus General & Tech Quiz Bowl',
+    title: 'Sample: Inter-Campus General & Tech Quiz Bowl',
     game: 'Quiz Challenges',
     type: 'Web Real-Time',
     university: 'AASTU Host',
@@ -113,7 +109,7 @@ export const DEFAULT_TOURNAMENTS: Tournament[] = [
 export const DEFAULT_ROOMS: GameRoom[] = [
   {
     id: 'AAU-8821',
-    name: '4 Kilo Dorm 5 Chess Room',
+    name: 'Sample: 4 Kilo Dorm 5 Chess Room',
     game: 'Chess',
     host: 'Bini_4Kilo',
     players: 2,
@@ -122,7 +118,7 @@ export const DEFAULT_ROOMS: GameRoom[] = [
   },
   {
     id: 'JU-3312',
-    name: 'Jimma Tech DLS Fast Match',
+    name: 'Sample: Jimma Tech DLS Fast Match',
     game: 'Dream League Soccer',
     host: 'Tedy_JU',
     players: 1,
@@ -131,7 +127,7 @@ export const DEFAULT_ROOMS: GameRoom[] = [
   },
   {
     id: 'ASTU-119',
-    name: 'Adama Coding & Gaming Chill',
+    name: 'Sample: Adama Coding & Gaming Chill',
     game: 'Tic-tac-toe',
     host: 'Hanna_ASTU',
     players: 1,
