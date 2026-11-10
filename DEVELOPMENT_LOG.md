@@ -1,8 +1,12 @@
 # Campus Arena Development Log
 
-## Stage 1: Technical cleanup and truthful interface (branch `phase-1-cleanup`)
+## Stage 1: Technical cleanup and truthful interface (branch `phase-1-cleanup-v2`)
 
-Date: 2026-11-09. Status: **done locally, not pushed, not deployed.**
+Dates: 2026-11-09 (implementation), 2026-11-10 (re-applied on `phase-1-cleanup-v2` from `main`, requirements re-checked against the files).
+Status: **committed locally, not pushed, not deployed, build not yet run.**
+
+Why not pushed: this session's GitHub token is invalid and Claude has no linked GitHub account for write access.
+Why build not run: the session has no access to the npm registry, so `npm install`, the lockfile, `npm run lint` and `npm run build` could not run. Run them before merging.
 
 ### What changed
 - **False claims removed**
