@@ -823,7 +823,7 @@ export default function App() {
                     { id: 'ttt', title: 'Campus Tic-Tac-Toe', cat: 'Casual AI & 2P', icon: '⭕' },
                     { id: 'quiz', title: 'University Quiz Bowl', cat: 'Trivia & Intellect', icon: '🧠' },
                     { id: 'checkers', title: 'Campus Dama (Checkers)', cat: 'Traditional Strategy', icon: '🎯' },
-                    { id: 'chess', title: 'Inter-Varsity Chess', cat: 'Opening Blitz', icon: '♟️' },
+                    { id: 'chess', title: 'Inter-Varsity Chess', cat: 'Board preview only', icon: '♟️', preview: true },
                   ].map((g) => (
                     <div
                       key={g.id}
@@ -833,9 +833,15 @@ export default function App() {
                         <span className="text-4xl p-3 rounded-xl bg-[#0d121f] group-hover:scale-110 transition-transform">
                           {g.icon}
                         </span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                          Playable
-                        </span>
+                        {'preview' in g && g.preview ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                            Preview
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            Playable
+                          </span>
+                        )}
                       </div>
                       <div className="mt-4">
                         <div className="text-xs text-gray-400">{g.cat}</div>
@@ -845,7 +851,7 @@ export default function App() {
                         onClick={() => launchGame(g.id)}
                         className="mt-4 w-full py-2 rounded-xl bg-gradient-to-r from-[#00f0ff] to-[#2563eb] text-black font-extrabold text-xs flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity"
                       >
-                        Play Now ⚡
+                        {'preview' in g && g.preview ? 'View Board' : 'Play Now ⚡'}
                       </button>
                     </div>
                   ))}
@@ -856,7 +862,7 @@ export default function App() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold flex items-center gap-2">
-                    <span>🏆</span> High-Stakes Tournaments
+                    <span>🏆</span> Sample Tournaments
                   </h3>
                   <button
                     onClick={() => setActivePage('tournaments')}
@@ -1318,7 +1324,7 @@ export default function App() {
               <div>
                 <h2 className="text-2xl font-black">🚪 Student Game Rooms</h2>
                 <p className="text-xs text-gray-400 mt-1">
-                  Create custom lobbies or sync with friends across dormitory blocks.
+                  Create a custom lobby. In this preview, lobbies are saved on this device only.
                 </p>
               </div>
 
