@@ -1,8 +1,22 @@
 @import "tailwindcss";
 
+/* Notification toast slide-in (used by the toast as `animate-bounce-short`). */
+@keyframes bounce-short {
+  0% { transform: translateY(12px); opacity: 0; }
+  60% { transform: translateY(-3px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.animate-bounce-short {
+  animation: bounce-short 0.35s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce-short { animation: none; }
+}
+
 @layer base {
   body {
-    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* System fonts only: no third-party font download. */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Ethiopic', sans-serif;
     background-color: #07090e;
     background-image: 
       radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.08) 0%, transparent 45%),
