@@ -935,7 +935,7 @@ export default function App() {
                   { id: 'ttt', name: 'Tic-Tac-Toe', badge: 'Playable', icon: '⭕' },
                   { id: 'quiz', name: 'Campus Quiz', badge: 'Playable', icon: '🧠' },
                   { id: 'checkers', name: 'Dama Checkers', badge: 'Playable', icon: '🎯' },
-                  { id: 'chess', name: 'Chess Arena', badge: 'Opening Board', icon: '♟️' },
+                  { id: 'chess', name: 'Chess Arena', badge: 'Preview', icon: '♟️' },
                   { id: 'eafc', name: 'EA FC 24', badge: 'Tourney', icon: '⚽' },
                   { id: 'dls', name: 'DLS 24', badge: 'Tourney', icon: '📱' },
                 ].map((g) => (
