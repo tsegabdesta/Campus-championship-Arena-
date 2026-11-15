@@ -3,21 +3,64 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { UserProfile, Tournament, GameRoom, QuizQuestion } from './types';
+import { UniversityRecord, UserProfile, Tournament, GameRoom, QuizQuestion } from './types';
 import { sanitizeUrl, sanitizeInteger } from './security';
 
-export const DEFAULT_UNIVERSITIES = [
-  'Addis Ababa University (AAU)',
-  'Adama Science & Technology University (ASTU)',
-  'Addis Ababa Science & Technology University (AASTU)',
-  'Jimma University (JU)',
-  'Hawassa University (HU)',
-  'Bahir Dar University (BDU)',
-  'Mekelle University (MU)',
-  'Haramaya University (HRU)',
-  'Arba Minch University (AMU)',
-  'Gondar University (UoG)',
+/**
+ * Canonical university registry. IDs are stable identifiers for future directory
+ * and leaderboard use; display names and abbreviations from the original list
+ * are retained exactly. No unverified stats, rankings, locations, or logos are
+ * included.
+ */
+export const UNIVERSITY_REGISTRY: readonly UniversityRecord[] = [
+  { id: 'addis-ababa-university', displayName: 'Addis Ababa University (AAU)', shortName: 'AAU' },
+  { id: 'adama-science-technology-university', displayName: 'Adama Science & Technology University (ASTU)', shortName: 'ASTU' },
+  { id: 'addis-ababa-science-technology-university', displayName: 'Addis Ababa Science & Technology University (AASTU)', shortName: 'AASTU' },
+  { id: 'jimma-university', displayName: 'Jimma University (JU)', shortName: 'JU' },
+  { id: 'hawassa-university', displayName: 'Hawassa University (HU)', shortName: 'HU' },
+  { id: 'bahir-dar-university', displayName: 'Bahir Dar University (BDU)', shortName: 'BDU' },
+  { id: 'mekelle-university', displayName: 'Mekelle University (MU)', shortName: 'MU' },
+  { id: 'haramaya-university', displayName: 'Haramaya University (HRU)', shortName: 'HRU' },
+  { id: 'arba-minch-university', displayName: 'Arba Minch University (AMU)', shortName: 'AMU' },
+  { id: 'gondar-university', displayName: 'Gondar University (UoG)', shortName: 'UoG' },
+  { id: 'wolaita-sodo-university', displayName: 'Wolaita Sodo University (WSU)', shortName: 'WSU' },
 ];
+
+/** Stable-ID lookup intended for future directory and leaderboard features. */
+export const UNIVERSITY_BY_ID: ReadonlyMap<string, UniversityRecord> = new Map(
+  UNIVERSITY_REGISTRY.map((university) => [university.id, university])
+);
+
+/**
+ * Compatibility export for existing UI code. The current profile selector
+ * consumes this array; deriving it here keeps that selector on the registry
+ * without changing its existing string-valued profile storage contract.
+ */
+export const DEFAULT_UNIVERSITIES: string[] = UNIVERSITY_REGISTRY.map(
+  (university) => university.displayName
+);
+
+/** Resolve a canonical name, abbreviation, or stable ID to its registry record. */
+export function findUniversity(value: string): UniversityRecord | undefined {
+  const normalized = value.trim().toLocaleLowerCase();
+  return UNIVERSITY_REGISTRY.find(
+    (university) =>
+      university.id.toLocaleLowerCase() === normalized ||
+      university.displayName.toLocaleLowerCase() === normalized ||
+      university.shortName.toLocaleLowerCase() === normalized
+  );
+}
+
+/**
+ * Validate profile university values while retaining legacy/custom saved values.
+ * Known names, abbreviations, and IDs are normalized to the canonical display
+ * name; unknown historical values remain visible rather than being discarded.
+ */
+function validateUniversity(value: unknown): string {
+  if (typeof value !== 'string' || !value.trim()) return DEFAULT_USER.university;
+  const trimmed = value.trim().slice(0, 80);
+  return findUniversity(trimmed)?.displayName ?? trimmed;
+}
 
 export const DEFAULT_USER: UserProfile = {
   // A fresh guest profile: no invented stats or badges. Real identity needs accounts (Phase 3).
@@ -170,7 +213,8 @@ export const ETHIOPIAN_QUIZ_QUESTIONS: QuizQuestion[] = [
 ];
 
 /**
- * Defensive localStorage validation function for user profiles
+ * Defensive localStorage validation function for user profiles.
+ * Existing saved string-valued university names remain compatible.
  */
 export function validateUserState(raw: unknown): UserProfile {
   if (!raw || typeof raw !== 'object') {
@@ -183,10 +227,7 @@ export function validateUserState(raw: unknown): UserProfile {
       typeof obj.username === 'string' && obj.username.trim()
         ? obj.username.trim().slice(0, 30)
         : DEFAULT_USER.username,
-    university:
-      typeof obj.university === 'string' && obj.university.trim()
-        ? obj.university.trim().slice(0, 80)
-        : DEFAULT_USER.university,
+    university: validateUniversity(obj.university),
     avatar: sanitizeUrl(obj.avatar),
     points: sanitizeInteger(obj.points, DEFAULT_USER.points, 0, 1000000),
     wins: sanitizeInteger(obj.wins, 0, 0, 100000),
@@ -201,7 +242,7 @@ export function validateUserState(raw: unknown): UserProfile {
 }
 
 /**
- * Defensive localStorage validation for tournament records
+ * Defensive localStorage validation function for tournament records
  */
 export function validateTournaments(raw: unknown): Tournament[] {
   if (!Array.isArray(raw)) return DEFAULT_TOURNAMENTS;

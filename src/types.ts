@@ -3,6 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * University metadata used by the preview app. Keep this registry as the single
+ * source for university names and stable IDs. Do not add estimated statistics
+ * or other unverified metadata here.
+ */
+export interface UniversityRecord {
+  /** Stable application ID; do not derive this from the display name at runtime. */
+  readonly id: string;
+  /** Canonical name shown in profile and registration selectors. */
+  readonly displayName: string;
+  /** Existing abbreviation, retained as written in the original university list. */
+  readonly shortName: string;
+}
+
 export interface Achievement {
   title: string;
   icon: string;

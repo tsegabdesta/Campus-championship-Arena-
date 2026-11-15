@@ -5,8 +5,8 @@
 Dates: 2026-11-09 (implementation), 2026-11-10 (re-applied on `phase-1-cleanup-v2` from `main`, requirements re-checked against the files).
 Status: **committed locally, not pushed, not deployed, build not yet run.**
 
-Why not pushed: this session's GitHub token is invalid and Claude has no linked GitHub account for write access.
-Why build not run: the session has no access to the npm registry, so `npm install`, the lockfile, `npm run lint` and `npm run build` could not run. Run them before merging.
+Why not pushed: this session's GitHub token was invalid and Claude had no linked GitHub account for write access.
+Why build not run: the session had no access to the npm registry, so `npm install`, the lockfile, `npm run lint` and `npm run build` could not run. Run them before merging.
 
 ### What changed
 - **False claims removed**
@@ -45,7 +45,23 @@ Why build not run: the session has no access to the npm registry, so `npm instal
 Accounts, multiplayer rooms, tournaments and brackets, leaderboard (other rows), chess, student verification. Payments: **none exist and none are activated.**
 
 ### Deployment status
-Nothing pushed. The live Netlify site still runs the old code from `main`.
+The Phase 1 pull request was merged into `main` at `1c220e26ea00c25846bbb2992db42b9999c51c73`. Phase 2 work is being done on `phase-2-university-expansion`; no deployment was performed by this change.
 
 ### Notes for later phases
 - Owner idea: a **premium tier** (leaderboards, prizes, private 1v1 rooms). Charging for it means collecting payments, and prizes funded by player fees may count as gambling. Both are gated on legal review (Phase 8). No payment code, Telebirr number or credentials belong in this repo.
+
+## Phase 2 — Stage 1: University data foundation and WSU integration
+
+Status: Implemented on `phase-2-university-expansion`; no merge or deployment performed.
+
+- Added a centralized university registry with stable IDs, canonical display names, and the existing short names. The original ten names/order are preserved; Wolaita Sodo University (WSU) is appended as university number 11.
+- Kept `DEFAULT_UNIVERSITIES` as a compatibility export derived from the registry, so the existing profile university selector receives all 11 records without changing the existing string-valued storage contract.
+- Added a lookup by stable ID and a resolver for ID, display name, or abbreviation to prepare for directory and leaderboard integration.
+- Profile validation canonicalizes known registry entries while retaining unknown legacy/custom saved university text. No university counts, rankings, logos, or location claims were added.
+- No dependencies were added. Existing gameplay, profile fields, and responsive components were not changed.
+
+### Stage 1 verification
+- Registry contents: 11 entries; original ten retained in the same order and exact display-name spelling; WSU is entry 11.
+- Selector integration: existing profile selector uses `DEFAULT_UNIVERSITIES`, which is derived directly from the registry.
+- Saved profile compatibility: the `university` field remains a string; known values and IDs resolve to canonical display names; unknown legacy values remain visible.
+- Type check, production build, and browser interaction checks were not run in this GitHub-only environment. Complete these before treating Stage 1 as fully verified.
